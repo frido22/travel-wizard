@@ -90,4 +90,5 @@ export interface FormInputs {
   budget: string;
   transportationMode: string;
   interests?: string; // Added for compatibility
+  additionalInfo?: string; // Added for general queries and additional information
 }
