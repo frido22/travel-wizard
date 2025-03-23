@@ -5,21 +5,17 @@ import { FormInputs, ItineraryResponse } from '@/types/itinerary';
 import { mockItineraryResponse } from '@/data/mockData';
 import VacationPlannerForm from './VacationPlannerForm';
 import ItineraryDisplay from './ItineraryDisplay';
-import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-
-interface ApiResponse {
-  itineraries?: any[];
-  textResponse?: string;
-  error?: string;
-}
 
 export default function VacationPlanner() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ItineraryResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
+  const [polling, setPolling] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
 
   // Check if the API key is available via our test endpoint
   useEffect(() => {
@@ -43,8 +39,11 @@ export default function VacationPlanner() {
 
   const handleSubmit = async (data: FormInputs) => {
     setLoading(true);
+    setResults(null);
     setError(null);
-    setDebugInfo('Starting itinerary generation...');
+    setDebugInfo(null);
+    setPolling(false);
+    setProgress(0);
 
     try {
       // Create a simpler prompt for the AI
@@ -69,17 +68,20 @@ Interests: ${data.interests || 'General sightseeing'}`;
         return;
       }
 
-      // Call our internal API route
-      console.log('Calling internal API route...');
-      setDebugInfo(prev => `${prev || ''}\n\nCalling internal API route...`);
+      // Call our internal API route to start the generation
+      console.log('Calling internal API route to start generation...');
+      setDebugInfo(prev => `${prev || ''}\n\nCalling internal API route to start generation...`);
       
-      const requestBody = JSON.stringify({ prompt: simplePrompt });
+      const requestBody = JSON.stringify({ 
+        prompt: simplePrompt,
+        formData: data
+      });
       setDebugInfo(prev => `${prev || ''}\nRequest body: ${requestBody}`);
       
       console.log('Request body:', requestBody);
       
       try {
-        const response = await fetch('/api/generate-itinerary', {
+        const response = await fetch('/api/generate-itinerary/start', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -97,7 +99,7 @@ Interests: ${data.interests || 'General sightseeing'}`;
           try {
             const errorJson = await response.json();
             errorText = errorJson.error || JSON.stringify(errorJson);
-          } catch (e) {
+          } catch {
             errorText = await response.text();
           }
           
@@ -106,158 +108,176 @@ Interests: ${data.interests || 'General sightseeing'}`;
           throw new Error(`API request failed: ${errorText}`);
         }
 
-        let result: ApiResponse;
+        let result: { jobId: string; status: string };
         try {
           result = await response.json();
-          console.log('API response received', result);
-          setDebugInfo(prev => `${prev || ''}\nAPI response received: ${JSON.stringify(result).substring(0, 300)}...`);
+          console.log('API response data:', result);
+          setDebugInfo(prev => `${prev || ''}\nAPI response data: ${JSON.stringify(result)}`);
         } catch (jsonError) {
           console.error('Error parsing JSON response:', jsonError);
-          setDebugInfo(prev => `${prev || ''}\nError parsing JSON response: ${jsonError instanceof Error ? jsonError.message : String(jsonError)}`);
+          setDebugInfo(prev => `${prev || ''}\nError parsing JSON response: ${jsonError}`);
           throw new Error('Failed to parse API response');
         }
 
-        if (result.error) {
-          setDebugInfo(prev => `${prev || ''}\nError from API: ${result.error}`);
-          throw new Error(result.error);
-        }
+        // Save the job ID for polling
+        setPolling(true);
+        setDebugInfo(prev => `${prev || ''}\nJob ID: ${result.jobId}`);
+        console.log('Job ID:', result.jobId);
 
-        // Check if we have itineraries directly
-        if (result.itineraries && Array.isArray(result.itineraries)) {
-          console.log('Received itineraries array directly');
-          setDebugInfo(prev => `${prev || ''}\nReceived itineraries array directly`);
-          setResults(result as ItineraryResponse);
-        }
-        // Create a simple itinerary object from the text response
-        else if (result.textResponse && typeof result.textResponse === 'string') {
-          const textResponse = result.textResponse;
-          console.log('Received text response:', textResponse.substring(0, 100) + '...');
-          setDebugInfo(prev => `${prev || ''}\nReceived text response (${textResponse.length} chars)`);
-          setDebugInfo(prev => `${prev || ''}\nText response preview: ${textResponse.substring(0, 300)}...`);
+        // Add a small delay before starting polling to ensure the job is saved
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-          const textItinerary: ItineraryResponse = {
-            itineraries: [
-              {
-                title: "AI Generated Itinerary",
-                focus: data.interests || "General sightseeing",
-                summary: "Generated based on your preferences",
-                dailySchedule: [],
-                accommodations: [],
-                costBreakdown: {
-                  activities: 0,
-                  meals: 0,
-                  accommodation: 0,
-                  transportation: 0,
-                  miscellaneous: 0,
-                  totalEstimatedCost: 0,
-                  comparisonToBudget: "",
-                  savingsSuggestions: []
-                },
-                localInsights: {
-                  culturalNotes: [],
-                  hiddenGems: [],
-                  crowdAvoidanceTips: []
-                },
-                practicalInfo: {
-                  weatherExpectations: "",
-                  packingSuggestions: []
-                },
-                textResponse: textResponse
-              }
-            ]
-          };
+        // Start polling for status
+        await pollJobStatus(result.jobId);
 
-          setResults(textItinerary);
-        } else {
-          console.error('Unexpected response format:', result);
-          setDebugInfo(prev => `${prev || ''}\nReceived unexpected response format: ${JSON.stringify(result).substring(0, 300)}...`);
-          throw new Error('Unexpected response format from API');
-        }
       } catch (fetchError) {
-        console.error('Fetch error:', fetchError);
-        setDebugInfo(prev => `${prev || ''}\nFetch error: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
-        throw fetchError;
-      }
-
-      setLoading(false);
-    } catch (err: any) {
-      console.error('Error generating vacation plan:', err);
-      setError(`Failed to generate vacation plan: ${err.message}`);
-      setDebugInfo(prev => `${prev || ''}\nError caught: ${err.message}`);
-      setLoading(false);
-
-      // Fall back to mock data for demonstration if API fails
-      console.log('Falling back to mock data');
-      setDebugInfo(prev => `${prev || ''}\nFalling back to mock data`);
-      setTimeout(() => {
-        setResults(mockItineraryResponse);
+        console.error('Error fetching from API:', fetchError);
+        setDebugInfo(prev => `${prev || ''}\nError fetching from API: ${fetchError}`);
+        setError(`Failed to generate itinerary: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
         setLoading(false);
-      }, 1000);
+      }
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+      setDebugInfo(prev => `${prev || ''}\nError in handleSubmit: ${error}`);
+      setError(`An unexpected error occurred: ${error instanceof Error ? error.message : String(error)}`);
+      setLoading(false);
+    }
+  };
+
+  // Function to poll for job status
+  const pollJobStatus = async (id: string) => {
+    try {
+      // Start with a longer polling interval that matches server-side polling
+      const pollInterval = 20000; // Start with 20 seconds to match server
+      let pollCount = 0;
+      const maxPolls = 15; // Maximum number of polls (15 polls at 20 seconds initially)
+      let retryCount = 0;
+      const maxRetries = 3; // Maximum number of retries for "Job not found" errors
+      
+      const poll = async () => {
+        if (pollCount >= maxPolls) {
+          throw new Error('Timed out waiting for itinerary generation');
+        }
+        
+        pollCount++;
+        // Update progress based on poll count (simple approximation)
+        setProgress(Math.min(95, Math.floor((pollCount / maxPolls) * 100)));
+        
+        try {
+          const response = await fetch(`/api/generate-itinerary/status?jobId=${id}`);
+          
+          if (response.status === 404) {
+            // Job not found - this could be a race condition
+            if (retryCount < maxRetries) {
+              retryCount++;
+              console.log(`Job not found, retrying (${retryCount}/${maxRetries})...`);
+              setDebugInfo(prev => `${prev || ''}\nJob not found, retrying in 1 second (${retryCount}/${maxRetries})...`);
+              
+              // Wait a short time and retry
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              await poll();
+              return;
+            } else {
+              throw new Error('Job not found after multiple retries');
+            }
+          } else if (!response.ok) {
+            let errorText;
+            try {
+              const errorJson = await response.json();
+              errorText = errorJson.error || JSON.stringify(errorJson);
+            } catch {
+              errorText = await response.text();
+            }
+            throw new Error(`Status check failed: ${errorText}`);
+          }
+          
+          const statusData = await response.json();
+          console.log('Status check result:', statusData);
+          setDebugInfo(prev => `${prev || ''}\nStatus check #${pollCount}: ${JSON.stringify(statusData)}`);
+          
+          if (statusData.status === 'completed') {
+            // Job is complete, set the results
+            console.log('Job completed, setting results');
+            setDebugInfo(prev => `${prev || ''}\nJob completed, setting results`);
+            setResults(statusData.result);
+            setLoading(false);
+            setProgress(100);
+            setPolling(false);
+            return;
+          } else if (statusData.status === 'failed') {
+            // Job failed, set the error
+            console.error('Job failed:', statusData.error);
+            setDebugInfo(prev => `${prev || ''}\nJob failed: ${statusData.error}`);
+            setError(`Failed to generate itinerary: ${statusData.error}`);
+            setLoading(false);
+            setPolling(false);
+            return;
+          } else {
+            // Job is still processing, continue polling with same interval
+            console.log(`Job still ${statusData.status}, continuing to poll`);
+            setDebugInfo(prev => `${prev || ''}\nJob still ${statusData.status}, continuing to poll`);
+            
+            // Keep the same polling interval to match server-side polling
+            // Schedule the next poll
+            setTimeout(poll, pollInterval);
+          }
+        } catch (error) {
+          console.error('Error checking job status:', error);
+          setDebugInfo(prev => `${prev || ''}\nError checking job status: ${error}`);
+          setError(`Failed to check generation status: ${error instanceof Error ? error.message : String(error)}`);
+          setLoading(false);
+          setPolling(false);
+        }
+      };
+      
+      // Start polling
+      await poll();
+    } catch (error) {
+      console.error('Error in polling:', error);
+      setDebugInfo(prev => `${prev || ''}\nError in polling: ${error}`);
+      setError(`Failed to monitor itinerary generation: ${error instanceof Error ? error.message : String(error)}`);
+      setLoading(false);
+      setPolling(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm">
-      <div className="p-6">
-        <div className="mb-6 text-center">
-          <h2 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-1">Travel Wizard</h2>
-        </div>
-        
-        <VacationPlannerForm onSubmit={handleSubmit} loading={loading} />
-        
-        {loading && (
-          <div className="mt-8">
-            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">Creating your itinerary</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Please wait while we plan your perfect trip</p>
-            
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm p-5">
-              {/* Itinerary Title and Summary */}
-              <Skeleton height={24} width="60%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-              <Skeleton height={16} count={2} className="mb-4" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-              
-              {/* Tabs */}
-              <div className="flex space-x-4 border-b border-gray-200 dark:border-gray-700 mb-5 pb-2">
-                <Skeleton height={12} width={60} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                <Skeleton height={12} width={80} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                <Skeleton height={12} width={70} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                <Skeleton height={12} width={50} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-              </div>
-              
-              {/* Content */}
-              <div className="space-y-4">
-                <Skeleton height={16} width="40%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                <Skeleton height={12} count={3} className="mb-3" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <Skeleton height={16} width="30%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                    <Skeleton height={12} count={2} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                  </div>
-                  <div>
-                    <Skeleton height={16} width="30%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                    <Skeleton height={12} count={2} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                  </div>
-                </div>
-                
-                <Skeleton height={16} width="40%" className="mb-2 mt-4" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-                <Skeleton height={12} count={2} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
-              </div>
+    <div className="max-w-5xl mx-auto px-4 py-8 relative">
+      <h1 className="text-3xl font-bold text-center mb-2 text-gray-800 dark:text-white">Travel Wizard</h1>
+      <p className="text-center mb-8 text-gray-600 dark:text-gray-300">Your AI-powered vacation planner</p>
+      
+      {(loading || polling) && (
+        <div className="mb-8 text-center">
+          <div className="flex flex-col items-center">
+            <div className="w-full max-w-md bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-4">
+              <div 
+                className="bg-blue-600 dark:bg-blue-500 h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${progress}%` }}
+              ></div>
             </div>
+            <p className="text-gray-700 dark:text-gray-300">
+              {progress < 30 && "Starting itinerary generation..."}
+              {progress >= 30 && progress < 60 && "Generating your personalized itinerary..."}
+              {progress >= 60 && progress < 90 && "Almost there! Finalizing your travel plans..."}
+              {progress >= 90 && "Putting the finishing touches on your itinerary..."}
+            </p>
           </div>
-        )}
-        
-        {error && (
-          <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 border-l-4 border-gray-400 text-gray-700 dark:text-gray-300 text-sm">
-            <p>{error}</p>
-          </div>
-        )}
-        
-        {results && !loading && (
-          <div className="mt-8">
-            <ItineraryDisplay itineraries={results.itineraries} />
-          </div>
-        )}
-      </div>
+        </div>
+      )}
+      
+      <VacationPlannerForm onSubmit={handleSubmit} loading={loading} />
+      
+      {error && (
+        <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 border-l-4 border-gray-400 text-gray-700 dark:text-gray-300 text-sm">
+          <p>{error}</p>
+        </div>
+      )}
+      
+      {results && !loading && (
+        <div className="mt-8">
+          <ItineraryDisplay itineraries={results.itineraries} />
+        </div>
+      )}
     </div>
   );
 }

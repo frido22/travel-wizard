@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios from 'axios';
+import { createJob, getJob, updateJob } from '@/lib/itineraryStore';
 
 // Use direct API calls instead of the SDK to avoid 'fs' module issues
 export async function POST(request: NextRequest) {
@@ -51,359 +52,171 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
 {
   "itineraries": [
     {
-      "title": "London Adventure",
-      "focus": "Sightseeing and Culture",
-      "summary": "A comprehensive tour of London's top attractions and cultural sites",
+      "title": "Trip Title",
+      "focus": "Main focus of the trip (e.g., Adventure, Culture, Relaxation)",
+      "summary": "Brief summary of the itinerary",
       "dailySchedule": [
         {
           "day": 1,
-          "date": "April 1",
+          "date": "Date in text format",
           "morning": {
-            "activity": "Arrival and Check-in",
-            "location": "Hotel",
-            "duration": "2 hours",
+            "activity": "Description of morning activity",
+            "location": "Location name",
+            "duration": "Duration in hours",
             "cost": 0,
-            "distance": "N/A",
-            "transportation": "Airport Transfer"
+            "distance": "Distance from previous location",
+            "transportation": "Mode of transportation"
           },
           "afternoon": {
-            "activity": "Westminster Walking Tour",
-            "location": "Westminster",
-            "duration": "3 hours",
+            "activity": "Description of afternoon activity",
+            "location": "Location name",
+            "duration": "Duration in hours",
             "cost": 0,
-            "distance": "1 mile",
-            "transportation": "Walking"
+            "distance": "Distance from previous location",
+            "transportation": "Mode of transportation"
           },
           "evening": {
-            "activity": "Dinner at Local Restaurant",
-            "location": "Covent Garden",
-            "duration": "2 hours",
-            "cost": 100,
-            "distance": "1 mile",
-            "transportation": "Tube"
+            "activity": "Description of evening activity",
+            "location": "Location name",
+            "duration": "Duration in hours",
+            "cost": 0,
+            "distance": "Distance from previous location",
+            "transportation": "Mode of transportation"
           },
           "meals": [
             {
-              "type": "Lunch",
-              "suggestion": "Sandwich at Pret A Manger",
-              "accommodatesRestrictions": true,
-              "cost": 15
-            },
-            {
-              "type": "Dinner",
-              "suggestion": "Traditional British cuisine at The Ivy",
-              "accommodatesRestrictions": true,
-              "cost": 100
-            }
-          ]
-        },
-        {
-          "day": 2,
-          "date": "April 2",
-          "morning": {
-            "activity": "Tower of London Tour",
-            "location": "Tower of London",
-            "duration": "2 hours",
-            "cost": 25,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "afternoon": {
-            "activity": "London Eye Ride",
-            "location": "London Eye",
-            "duration": "1 hour",
-            "cost": 30,
-            "distance": "1 mile",
-            "transportation": "Walking"
-          },
-          "evening": {
-            "activity": "Dinner at Local Restaurant",
-            "location": "South Bank",
-            "duration": "2 hours",
-            "cost": 100,
-            "distance": "1 mile",
-            "transportation": "Tube"
-          },
-          "meals": [
-            {
-              "type": "Lunch",
-              "suggestion": "Fish and Chips at The Fisherman's Arms",
-              "accommodatesRestrictions": true,
-              "cost": 20
-            },
-            {
-              "type": "Dinner",
-              "suggestion": "Modern British cuisine at The Delaunay",
-              "accommodatesRestrictions": true,
-              "cost": 120
-            }
-          ]
-        },
-        {
-          "day": 3,
-          "date": "April 3",
-          "morning": {
-            "activity": "British Museum Visit",
-            "location": "British Museum",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "afternoon": {
-            "activity": "Covent Garden Shopping",
-            "location": "Covent Garden",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "1 mile",
-            "transportation": "Walking"
-          },
-          "evening": {
-            "activity": "Dinner at Local Restaurant",
-            "location": "Soho",
-            "duration": "2 hours",
-            "cost": 100,
-            "distance": "1 mile",
-            "transportation": "Tube"
-          },
-          "meals": [
-            {
-              "type": "Lunch",
-              "suggestion": "Sandwich at Pret A Manger",
-              "accommodatesRestrictions": true,
-              "cost": 15
-            },
-            {
-              "type": "Dinner",
-              "suggestion": "Italian cuisine at Bocca di Lupo",
-              "accommodatesRestrictions": true,
-              "cost": 120
-            }
-          ]
-        },
-        {
-          "day": 4,
-          "date": "April 4",
-          "morning": {
-            "activity": "Hyde Park Visit",
-            "location": "Hyde Park",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "afternoon": {
-            "activity": "Kensington Palace Tour",
-            "location": "Kensington Palace",
-            "duration": "2 hours",
-            "cost": 20,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "evening": {
-            "activity": "Dinner at Local Restaurant",
-            "location": "Notting Hill",
-            "duration": "2 hours",
-            "cost": 100,
-            "distance": "1 mile",
-            "transportation": "Tube"
-          },
-          "meals": [
-            {
-              "type": "Lunch",
-              "suggestion": "Salad at The Natural History Museum Cafe",
-              "accommodatesRestrictions": true,
-              "cost": 15
-            },
-            {
-              "type": "Dinner",
-              "suggestion": "Caribbean cuisine at The Rum Kitchen",
-              "accommodatesRestrictions": true,
-              "cost": 120
-            }
-          ]
-        },
-        {
-          "day": 5,
-          "date": "April 5",
-          "morning": {
-            "activity": "Tate Modern Visit",
-            "location": "Tate Modern",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "afternoon": {
-            "activity": "Borough Market Visit",
-            "location": "Borough Market",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "1 mile",
-            "transportation": "Walking"
-          },
-          "evening": {
-            "activity": "Dinner at Local Restaurant",
-            "location": "Shoreditch",
-            "duration": "2 hours",
-            "cost": 100,
-            "distance": "1 mile",
-            "transportation": "Tube"
-          },
-          "meals": [
-            {
-              "type": "Lunch",
-              "suggestion": "Street food at Borough Market",
-              "accommodatesRestrictions": true,
-              "cost": 10
-            },
-            {
-              "type": "Dinner",
-              "suggestion": "Indian cuisine at Dishoom",
-              "accommodatesRestrictions": true,
-              "cost": 120
-            }
-          ]
-        },
-        {
-          "day": 6,
-          "date": "April 6",
-          "morning": {
-            "activity": "Regent's Park Visit",
-            "location": "Regent's Park",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "afternoon": {
-            "activity": "Madame Tussauds Visit",
-            "location": "Madame Tussauds",
-            "duration": "2 hours",
-            "cost": 30,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "evening": {
-            "activity": "Dinner at Local Restaurant",
-            "location": "Camden",
-            "duration": "2 hours",
-            "cost": 100,
-            "distance": "1 mile",
-            "transportation": "Tube"
-          },
-          "meals": [
-            {
-              "type": "Lunch",
-              "suggestion": "Sandwich at Pret A Manger",
-              "accommodatesRestrictions": true,
-              "cost": 15
-            },
-            {
-              "type": "Dinner",
-              "suggestion": "Vegetarian cuisine at The Gate",
-              "accommodatesRestrictions": true,
-              "cost": 120
-            }
-          ]
-        },
-        {
-          "day": 7,
-          "date": "April 7",
-          "morning": {
-            "activity": "Harrods Visit",
-            "location": "Harrods",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "afternoon": {
-            "activity": "Hyde Park Winter Wonderland",
-            "location": "Hyde Park",
-            "duration": "2 hours",
-            "cost": 0,
-            "distance": "2 miles",
-            "transportation": "Tube"
-          },
-          "evening": {
-            "activity": "Dinner at Local Restaurant",
-            "location": "Knightsbridge",
-            "duration": "2 hours",
-            "cost": 100,
-            "distance": "1 mile",
-            "transportation": "Tube"
-          },
-          "meals": [
-            {
-              "type": "Lunch",
-              "suggestion": "Afternoon tea at The Ritz",
-              "accommodatesRestrictions": true,
-              "cost": 50
-            },
-            {
-              "type": "Dinner",
-              "suggestion": "Fine dining at The Ledbury",
-              "accommodatesRestrictions": true,
-              "cost": 200
+              "type": "breakfast/lunch/dinner",
+              "suggestion": "Restaurant or meal suggestion",
+              "accommodatesRestrictions": true/false,
+              "cost": 0
             }
           ]
         }
       ],
       "accommodations": [
         {
-          "name": "Park Plaza Westminster Bridge",
-          "description": "4-star hotel with views of Big Ben",
-          "amenities": ["Free WiFi", "Spa", "Restaurant"],
-          "proximityToAttractions": "Walking distance to London Eye and Westminster",
-          "costPerNight": 250,
-          "totalAccommodationCost": 1500
+          "name": "Accommodation name",
+          "description": "Brief description",
+          "amenities": ["amenity1", "amenity2"],
+          "proximityToAttractions": "Description of location advantages",
+          "costPerNight": 0,
+          "totalAccommodationCost": 0
         }
       ],
       "costBreakdown": {
-        "activities": 500,
-        "meals": 1200,
-        "accommodation": 1500,
-        "transportation": 300,
-        "miscellaneous": 500,
-        "totalEstimatedCost": 4000,
-        "comparisonToBudget": "Well within budget",
-        "savingsSuggestions": ["Use Oyster card for public transport", "Visit free museums"]
+        "activities": 0,
+        "meals": 0,
+        "accommodation": 0,
+        "transportation": 0,
+        "miscellaneous": 0,
+        "totalEstimatedCost": 0,
+        "comparisonToBudget": "Under/Over budget explanation",
+        "savingsSuggestions": ["suggestion1", "suggestion2"]
       },
       "localInsights": {
-        "culturalNotes": ["Tipping is typically 10-15%", "Stand on the right on escalators"],
-        "hiddenGems": ["Little Venice", "Postman's Park"],
-        "crowdAvoidanceTips": ["Visit popular attractions early morning", "Book tickets online in advance"]
+        "culturalNotes": ["note1", "note2"],
+        "hiddenGems": ["gem1", "gem2"],
+        "crowdAvoidanceTips": ["tip1", "tip2"]
       },
       "practicalInfo": {
-        "weatherExpectations": "April in London can be unpredictable with average temperatures of 8-15°C and occasional rain",
-        "packingSuggestions": ["Umbrella", "Light jacket", "Comfortable walking shoes"]
+        "weatherExpectations": "Weather description",
+        "packingSuggestions": ["item1", "item2"],
+        "advanceReservations": ["reservation1", "reservation2"],
+        "transportationTips": ["tip1", "tip2"],
+        "safetyInfo": ["info1", "info2"]
       }
     }
   ]
-}
-
-Make sure to include all days in the dailySchedule array, with appropriate activities for each part of the day.`;
+}`;
 
     console.log('Structured prompt length:', structuredPrompt.length);
     
-    // Determine whether to use Maestro with web search or standard chat completions
-    const useWebSearch = true; // Set to true to use web search, false to use standard chat
+    // Create a job and start the generation process
+    const job = createJob(prompt, requestBody.formData);
     
-    let result = null;
+    // Start the generation process in the background
+    generateItinerary(job.id, structuredPrompt, apiKey).catch(error => {
+      console.error(`Error in background job ${job.id}:`, error);
+    });
+    
+    // For backward compatibility, wait for the job to complete
+    // This is not ideal for long-running jobs, but maintains compatibility
+    try {
+      // Poll for completion with a timeout
+      const maxWaitTime = 55000; // 55 seconds (just under Vercel's 60s limit)
+      const startTime = Date.now();
+      
+      while (true) {
+        // Check if we're approaching the timeout
+        if (Date.now() - startTime > maxWaitTime) {
+          console.log('Approaching timeout limit, returning partial result');
+          break;
+        }
+        
+        // Get the current job status
+        const currentJob = getJob(job.id);
+        
+        if (!currentJob) {
+          throw new Error('Job not found');
+        }
+        
+        if (currentJob.status === 'completed') {
+          // Job completed successfully
+          return NextResponse.json(currentJob.result);
+        } else if (currentJob.status === 'failed') {
+          // Job failed
+          throw new Error(currentJob.error || 'Job failed');
+        }
+        
+        // Wait before checking again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // If we get here, we're approaching the timeout
+      // Return a response indicating the job is still in progress
+      return NextResponse.json({
+        textResponse: "Your itinerary is still being generated. Please try again in a moment."
+      });
+    } catch (error) {
+      console.error('Error waiting for job completion:', error);
+      throw error;
+    }
+  } catch (error: unknown) {
+    console.error('Error in API route:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json(
+      { error: `Failed to generate itinerary: ${errorMessage}` },
+      { status: 500 }
+    );
+  }
+}
+
+// This function runs in the background and doesn't block the response
+async function generateItinerary(jobId: string, structuredPrompt: string, apiKey: string) {
+  try {
+    // Update job status to processing
+    updateJob(jobId, { status: 'processing' });
+    
+    // Determine whether to use Maestro with web search or standard chat completions
+    const useMaestro = true; // Always try Maestro first
     
     // First try Maestro with web search if enabled
-    if (useWebSearch) {
+    if (useMaestro) {
       console.log('Using AI21 Maestro with web search...');
       
       try {
+        // Log the request payload for debugging
+        const maestroPayload = {
+          maestroId: "travel-planner",
+          input: structuredPrompt,
+          includeWebSearch: true
+        };
+        console.log('Maestro API request payload:', JSON.stringify(maestroPayload));
+        
         // Create a Maestro run with web search
         const maestroResponse = await axios.post(
           'https://api.ai21.com/studio/v1/maestro/runs',
-          {
-            input: structuredPrompt,
-            tools: [{ type: "web_search" }]
-          },
+          maestroPayload,
           {
             headers: {
               'Authorization': `Bearer ${apiKey}`,
@@ -415,16 +228,21 @@ Make sure to include all days in the dailySchedule array, with appropriate activ
         const runId = maestroResponse.data.id;
         console.log('Maestro Run ID:', runId);
         
-        // Poll for results with timeout
-        let runStatus = 'running';
-        let runResult;
+        // Poll for completion
+        let runStatus = 'in_progress';
+        let resultText = '';
         let attempts = 0;
-        const maxAttempts = 12; // 5 seconds * 12 = 60 seconds max wait time
+        const maxAttempts = 15; // 5 minutes (15 * 20 seconds)
         
-        while ((runStatus === 'running' || runStatus === 'pending' || runStatus === 'in_progress') && attempts < maxAttempts) {
-          console.log(`Run status: ${runStatus}, waiting 5 seconds... (attempt ${attempts + 1}/${maxAttempts})`);
-          await new Promise(resolve => setTimeout(resolve, 5000));
+        while (runStatus === 'in_progress') {
+          if (attempts >= maxAttempts) {
+            console.log('Maestro run taking too long, falling back to standard chat completions...');
+            break;
+          }
+          
           attempts++;
+          console.log(`Run status: ${runStatus}, waiting 20 seconds... (attempt ${attempts}/${maxAttempts})`);
+          await new Promise(resolve => setTimeout(resolve, 20000));
           
           const statusResponse = await axios.get(
             `https://api.ai21.com/studio/v1/maestro/runs/${runId}`,
@@ -437,53 +255,85 @@ Make sure to include all days in the dailySchedule array, with appropriate activ
           );
           
           runStatus = statusResponse.data.status;
-          runResult = statusResponse.data;
+          console.log(`Updated run status: ${runStatus}`);
+          
+          if (runStatus === 'completed') {
+            resultText = statusResponse.data.outputs.text;
+            break;
+          } else if (runStatus === 'failed') {
+            console.error('Maestro run failed:', statusResponse.data);
+            break;
+          }
         }
         
         console.log('Maestro Final Status:', runStatus);
         
         if (runStatus === 'completed') {
           console.log('Maestro response received successfully');
+          console.log('Maestro text received (length):', resultText.length);
           
           // Try to extract JSON from the response
-          const resultText = runResult.result;
-          const jsonMatch = resultText.match(/\{[\s\S]*\}/);
-          
-          if (jsonMatch) {
-            console.log('JSON pattern found in Maestro response');
-            const jsonString = jsonMatch[0];
-            console.log('JSON string length:', jsonString.length);
-            console.log('First 100 chars of JSON string:', jsonString.substring(0, 100));
+          try {
+            // Find JSON in the text
+            const jsonMatch = resultText.match(/\{[\s\S]*\}/);
             
-            try {
-              const parsedData = JSON.parse(jsonString);
-              console.log('Successfully parsed JSON response from Maestro');
-              console.log('Parsed data structure:', Object.keys(parsedData));
-              result = parsedData;
-            } catch (jsonParseError) {
-              console.error('Error parsing extracted JSON from Maestro:', jsonParseError);
-              console.log('JSON parse error on string:', jsonString.substring(0, 200));
-              result = { textResponse: resultText };
+            if (jsonMatch) {
+              console.log('JSON pattern found in response');
+              const jsonString = jsonMatch[0];
+              console.log('JSON string length:', jsonString.length);
+              console.log('First 100 chars of JSON string:', jsonString.substring(0, 100));
+              
+              try {
+                const parsedData = JSON.parse(jsonString);
+                console.log('Successfully parsed JSON response');
+                console.log('Parsed data structure:', Object.keys(parsedData));
+                
+                // Update job with result
+                updateJob(jobId, { 
+                  status: 'completed',
+                  result: parsedData
+                });
+                return;
+              } catch (jsonParseError) {
+                console.error('Error parsing extracted JSON:', jsonParseError);
+                console.log('JSON parse error on string:', jsonString.substring(0, 200));
+                
+                // Update job with text response
+                updateJob(jobId, { 
+                  status: 'completed',
+                  result: { textResponse: resultText }
+                });
+                return;
+              }
+            } else {
+              // If no JSON found, return as text
+              console.log('No JSON found in response, returning as text');
+              
+              // Update job with text response
+              updateJob(jobId, { 
+                status: 'completed',
+                result: { textResponse: resultText }
+              });
+              return;
             }
-          } else {
-            // If no JSON found, return as text
-            console.log('No JSON found in Maestro response, returning as text');
-            result = { textResponse: resultText };
+          } catch (parseError) {
+            console.error('Error in JSON extraction process:', parseError);
+            
+            // Update job with text response
+            updateJob(jobId, { 
+              status: 'completed',
+              result: { textResponse: resultText }
+            });
+            return;
           }
         }
-        // If we got a result, we'll return it at the end of the function
-        if (result) {
-          return NextResponse.json(result);
-        }
-        
-        // Otherwise, we'll fall back to standard chat completions
-        console.log('Maestro did not provide a usable result. Falling back to standard chat completions...');
       } catch (error) {
         const maestroError = error as Error;
         console.error('Error with Maestro API:', maestroError.message);
         if (axios.isAxiosError(maestroError) && maestroError.response) {
           console.error('Maestro error response data:', JSON.stringify(maestroError.response.data));
           console.error('Maestro error status:', maestroError.response.status);
+          console.error('Maestro error headers:', JSON.stringify(maestroError.response.headers));
         }
         console.log('Falling back to standard chat completions...');
       }
@@ -533,38 +383,52 @@ Make sure to include all days in the dailySchedule array, with appropriate activ
           const parsedData = JSON.parse(jsonString);
           console.log('Successfully parsed JSON response');
           console.log('Parsed data structure:', Object.keys(parsedData));
-          return NextResponse.json(parsedData);
+          
+          // Update job with result
+          updateJob(jobId, { 
+            status: 'completed',
+            result: parsedData
+          });
+          return;
         } catch (jsonParseError) {
           console.error('Error parsing extracted JSON:', jsonParseError);
           console.log('JSON parse error on string:', jsonString.substring(0, 200));
-          return NextResponse.json({ textResponse: completionText });
+          
+          // Update job with text response
+          updateJob(jobId, { 
+            status: 'completed',
+            result: { textResponse: completionText }
+          });
+          return;
         }
       } else {
         // If no JSON found, return as text
         console.log('No JSON found in response, returning as text');
-        return NextResponse.json({ textResponse: completionText });
+        
+        // Update job with text response
+        updateJob(jobId, { 
+          status: 'completed',
+          result: { textResponse: completionText }
+        });
+        return;
       }
     } catch (parseError) {
       console.error('Error in JSON extraction process:', parseError);
-      return NextResponse.json({ textResponse: completionText });
+      
+      // Update job with text response
+      updateJob(jobId, { 
+        status: 'completed',
+        result: { textResponse: completionText }
+      });
+      return;
     }
-  } catch (error: any) {
-    console.error('Server error:', error.message);
-    console.error('Error stack:', error.stack);
+  } catch (error) {
+    console.error('Error generating itinerary:', error);
     
-    // Determine if this is an AI21 API error
-    if (axios.isAxiosError(error) && error.response) {
-      console.error('API error response:', JSON.stringify(error.response.data));
-      console.error('API error status:', error.response.status);
-      return NextResponse.json(
-        { error: `AI21 API error: ${error.message}` },
-        { status: 500 }
-      );
-    }
-    
-    return NextResponse.json(
-      { error: `Server error: ${error.message}` },
-      { status: 500 }
-    );
+    // Update job with error
+    updateJob(jobId, { 
+      status: 'failed',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }
