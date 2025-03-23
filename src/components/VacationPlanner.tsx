@@ -197,52 +197,63 @@ Interests: ${data.interests || 'General sightseeing'}`;
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-      <div className="p-6 md:p-8">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Plan Your Perfect Vacation</h2>
-
-        {hasApiKey === null ? (
-          <p className="text-gray-600 dark:text-gray-400 mb-4">Checking API configuration...</p>
-        ) : (
-          <>
-            {hasApiKey === false && (
-              <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 rounded-md">
-                <p>⚠️ API key not detected. Using mock data for demonstrations.</p>
-              </div>
-            )}
-            <VacationPlannerForm onSubmit={handleSubmit} loading={loading} />
-          </>
-        )}
-
+    <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm">
+      <div className="p-6">
+        <div className="mb-6 text-center">
+          <h2 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-1">Travel Wizard</h2>
+        </div>
+        
+        <VacationPlannerForm onSubmit={handleSubmit} loading={loading} />
+        
         {loading && (
           <div className="mt-8">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Crafting your perfect adventure...</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">The Itinerarist is hard at work, researching the best options for your trip!</p>
-            <div className="space-y-4">
-              <Skeleton height={40} />
-              <Skeleton count={3} />
-              <Skeleton height={100} />
-              <Skeleton count={2} />
+            <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">Creating your itinerary</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Please wait while we plan your perfect trip</p>
+            
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm p-5">
+              {/* Itinerary Title and Summary */}
+              <Skeleton height={24} width="60%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+              <Skeleton height={16} count={2} className="mb-4" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+              
+              {/* Tabs */}
+              <div className="flex space-x-4 border-b border-gray-200 dark:border-gray-700 mb-5 pb-2">
+                <Skeleton height={12} width={60} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                <Skeleton height={12} width={80} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                <Skeleton height={12} width={70} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                <Skeleton height={12} width={50} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+              </div>
+              
+              {/* Content */}
+              <div className="space-y-4">
+                <Skeleton height={16} width="40%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                <Skeleton height={12} count={3} className="mb-3" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <Skeleton height={16} width="30%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                    <Skeleton height={12} count={2} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                  </div>
+                  <div>
+                    <Skeleton height={16} width="30%" className="mb-2" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                    <Skeleton height={12} count={2} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                  </div>
+                </div>
+                
+                <Skeleton height={16} width="40%" className="mb-2 mt-4" baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+                <Skeleton height={12} count={2} baseColor="#e5e7eb" highlightColor="#f3f4f6" />
+              </div>
             </div>
           </div>
         )}
-
+        
         {error && (
-          <div className="mt-8 p-4 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md">
+          <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-700 border-l-4 border-gray-400 text-gray-700 dark:text-gray-300 text-sm">
             <p>{error}</p>
           </div>
         )}
-
-        {debugInfo && (
-          <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md font-mono text-xs whitespace-pre-wrap overflow-auto max-h-96">
-            <h4 className="font-bold mb-2">Debug Information:</h4>
-            {debugInfo}
-          </div>
-        )}
-
+        
         {results && !loading && (
           <div className="mt-8">
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Your Custom Itineraries</h3>
             <ItineraryDisplay itineraries={results.itineraries} />
           </div>
         )}

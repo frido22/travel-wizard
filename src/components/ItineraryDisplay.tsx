@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { Itinerary } from '@/types/itinerary';
 import { Tab } from '@headlessui/react';
-import ItineraryDetails from './ItineraryDetails';
+import ItineraryOverview from './itinerary/ItineraryOverview';
 import DailySchedule from './itinerary/DailySchedule';
 import ItineraryInsights from './itinerary/ItineraryInsights';
 import ItineraryCosts from './itinerary/ItineraryCosts';
+import ItineraryPractical from './itinerary/ItineraryPractical';
+import ItineraryAccommodations from './itinerary/ItineraryAccommodations';
 
 interface ItineraryDisplayProps {
   itineraries: Itinerary[];
@@ -19,9 +21,9 @@ export default function ItineraryDisplay({ itineraries }: ItineraryDisplayProps)
   // If there's only a text response, display it directly
   if (itineraries[0]?.textResponse && !itineraries[0]?.dailySchedule?.length) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">{itineraries[0].title}</h3>
-        <div className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">
+      <div className="bg-white dark:bg-gray-800 rounded-sm border border-gray-200 dark:border-gray-700 p-5">
+        <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-3">{itineraries[0].title}</h3>
+        <div className="whitespace-pre-wrap text-gray-600 dark:text-gray-400 text-sm">
           {itineraries[0].textResponse}
         </div>
       </div>
@@ -32,16 +34,16 @@ export default function ItineraryDisplay({ itineraries }: ItineraryDisplayProps)
   const dailySchedule = currentItinerary?.dailySchedule || [];
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-sm">
       {itineraries.length > 1 && (
         <div className="border-b border-gray-200 dark:border-gray-700">
           <nav className="flex overflow-x-auto">
             {itineraries.map((itinerary, index) => (
               <button
                 key={index}
-                className={`px-4 py-3 text-sm font-medium ${
+                className={`px-4 py-2 text-sm ${
                   selectedItinerary === index
-                    ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                    ? 'border-b-2 border-gray-800 text-gray-800 dark:border-gray-400 dark:text-gray-200'
                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }`}
                 onClick={() => setSelectedItinerary(index)}
@@ -53,30 +55,30 @@ export default function ItineraryDisplay({ itineraries }: ItineraryDisplayProps)
         </div>
       )}
       
-      <div className="p-6">
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+      <div className="p-5">
+        <div className="mb-5">
+          <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 mb-2">
             {currentItinerary?.title || 'Your Custom Itinerary'}
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
             {currentItinerary?.summary || 'A personalized travel plan based on your preferences.'}
           </p>
           
           {currentItinerary?.focus && (
-            <div className="inline-block bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full mb-4">
+            <div className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded-sm mb-3">
               {currentItinerary.focus}
             </div>
           )}
         </div>
         
         <Tab.Group>
-          <Tab.List className="flex space-x-1 rounded-xl bg-blue-50 dark:bg-gray-700 p-1 mb-6">
+          <Tab.List className="flex space-x-1 border-b border-gray-200 dark:border-gray-700 mb-5">
             <Tab 
               className={({ selected }) =>
-                `w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+                `py-2 px-4 text-sm font-medium 
                 ${selected 
-                  ? 'bg-white dark:bg-gray-800 shadow text-blue-700 dark:text-blue-400' 
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-white/[0.12] hover:text-blue-700 dark:hover:text-blue-400'
+                  ? 'border-b-2 border-gray-800 text-gray-800 dark:border-gray-400 dark:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }`
               }
             >
@@ -84,10 +86,10 @@ export default function ItineraryDisplay({ itineraries }: ItineraryDisplayProps)
             </Tab>
             <Tab 
               className={({ selected }) =>
-                `w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+                `py-2 px-4 text-sm font-medium 
                 ${selected 
-                  ? 'bg-white dark:bg-gray-800 shadow text-blue-700 dark:text-blue-400' 
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-white/[0.12] hover:text-blue-700 dark:hover:text-blue-400'
+                  ? 'border-b-2 border-gray-800 text-gray-800 dark:border-gray-400 dark:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }`
               }
             >
@@ -95,10 +97,21 @@ export default function ItineraryDisplay({ itineraries }: ItineraryDisplayProps)
             </Tab>
             <Tab 
               className={({ selected }) =>
-                `w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+                `py-2 px-4 text-sm font-medium 
                 ${selected 
-                  ? 'bg-white dark:bg-gray-800 shadow text-blue-700 dark:text-blue-400' 
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-white/[0.12] hover:text-blue-700 dark:hover:text-blue-400'
+                  ? 'border-b-2 border-gray-800 text-gray-800 dark:border-gray-400 dark:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`
+              }
+            >
+              Accommodations
+            </Tab>
+            <Tab 
+              className={({ selected }) =>
+                `py-2 px-4 text-sm font-medium 
+                ${selected 
+                  ? 'border-b-2 border-gray-800 text-gray-800 dark:border-gray-400 dark:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }`
               }
             >
@@ -106,33 +119,44 @@ export default function ItineraryDisplay({ itineraries }: ItineraryDisplayProps)
             </Tab>
             <Tab 
               className={({ selected }) =>
-                `w-full rounded-lg py-2.5 text-sm font-medium leading-5 
+                `py-2 px-4 text-sm font-medium 
                 ${selected 
-                  ? 'bg-white dark:bg-gray-800 shadow text-blue-700 dark:text-blue-400' 
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-white/[0.12] hover:text-blue-700 dark:hover:text-blue-400'
+                  ? 'border-b-2 border-gray-800 text-gray-800 dark:border-gray-400 dark:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
                 }`
               }
             >
               Insights
             </Tab>
+            <Tab 
+              className={({ selected }) =>
+                `py-2 px-4 text-sm font-medium 
+                ${selected 
+                  ? 'border-b-2 border-gray-800 text-gray-800 dark:border-gray-400 dark:text-gray-200' 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+                }`
+              }
+            >
+              Practical
+            </Tab>
           </Tab.List>
           
-          <Tab.Panels className="mt-2">
-            <Tab.Panel className="rounded-xl bg-white dark:bg-gray-800 p-3">
-              <ItineraryDetails itinerary={currentItinerary} />
+          <Tab.Panels>
+            <Tab.Panel>
+              <ItineraryOverview itinerary={currentItinerary} />
             </Tab.Panel>
             
-            <Tab.Panel className="rounded-xl bg-white dark:bg-gray-800 p-3">
+            <Tab.Panel>
               {dailySchedule.length > 0 ? (
                 <div>
                   <div className="flex overflow-x-auto mb-4 pb-2">
                     {dailySchedule.map((day, index) => (
                       <button
                         key={index}
-                        className={`px-4 py-2 text-sm font-medium rounded-full mr-2 whitespace-nowrap ${
+                        className={`px-3 py-1.5 text-xs rounded-sm mr-2 whitespace-nowrap ${
                           selectedDay === index
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            ? 'bg-gray-800 dark:bg-gray-600 text-white'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                         onClick={() => setSelectedDay(index)}
                       >
@@ -144,19 +168,31 @@ export default function ItineraryDisplay({ itineraries }: ItineraryDisplayProps)
                   <DailySchedule day={dailySchedule[selectedDay]} />
                 </div>
               ) : (
-                <p className="text-gray-600 dark:text-gray-400">No daily schedule information available.</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No daily schedule information available.</p>
               )}
             </Tab.Panel>
             
-            <Tab.Panel className="rounded-xl bg-white dark:bg-gray-800 p-3">
+            <Tab.Panel>
+              {currentItinerary?.accommodations && currentItinerary.accommodations.length > 0 ? (
+                <ItineraryAccommodations accommodations={currentItinerary.accommodations} />
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-sm">No accommodation information available.</p>
+              )}
+            </Tab.Panel>
+            
+            <Tab.Panel>
               <ItineraryCosts costBreakdown={currentItinerary?.costBreakdown} />
             </Tab.Panel>
             
-            <Tab.Panel className="rounded-xl bg-white dark:bg-gray-800 p-3">
+            <Tab.Panel>
               <ItineraryInsights 
                 localInsights={currentItinerary?.localInsights} 
-                practicalInfo={currentItinerary?.practicalInfo} 
+                practicalInfo={undefined} 
               />
+            </Tab.Panel>
+            
+            <Tab.Panel>
+              <ItineraryPractical practicalInfo={currentItinerary?.practicalInfo} />
             </Tab.Panel>
           </Tab.Panels>
         </Tab.Group>
