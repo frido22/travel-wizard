@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Itinerarist - Vacation Planner
+
+A Next.js application that uses AI to create detailed, personalized vacation itineraries based on user inputs. The Itinerarist is a quirky but incredibly thorough vacation planning agent that crafts ridiculously detailed itineraries balancing fun, practicality, and the inevitable chaos of travel.
+
+## Features
+
+- Interactive form to collect user travel preferences
+- AI-powered itinerary generation using AI21 Maestro
+- Detailed itinerary display with information about:
+  - Daily schedules with activities and meals
+  - Accommodation options
+  - Cost breakdowns and budget analysis
+  - Local insights and practical information
+- Responsive design with Tailwind CSS
+- TypeScript for type safety
+
+## Prerequisites
+
+- Node.js 18.17.0 or later
+- AI21 API key
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env.local` file in the root directory with the following content:
+
+```
+AI21_API_KEY=your_api_key_here
+```
+
+4. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `src/app/page.tsx` - Main page component
+- `src/components/VacationPlanner.tsx` - Form component for user inputs and API integration
+- `src/components/ItineraryDisplay.tsx` - Component to display multiple itineraries
+- `src/components/ItineraryDetails.tsx` - Component to display detailed information about each itinerary
 
-## Learn More
+## How It Works
 
-To learn more about Next.js, take a look at the following resources:
+1. Users enter their travel preferences (destination, dates, budget, etc.)
+2. The application sends this information to the AI21 Maestro API
+3. The API generates detailed itineraries based on the user inputs
+4. The application displays the itineraries with tabs for different sections
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The easiest way to deploy this application is to use the [Vercel Platform](https://vercel.com/new) from the creators of Next.js.
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
