@@ -201,7 +201,7 @@ Interests: ${data.interests || 'General sightseeing'}`;
               try {
                 const errorData = await response.json();
                 throw new Error(`Job not found after multiple retries. ${errorData.message || 'Please try again.'}`);
-              } catch (jsonError) {
+              } catch {
                 throw new Error('Job not found after multiple retries. Please try again.');
               }
             }

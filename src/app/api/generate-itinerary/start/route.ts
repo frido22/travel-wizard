@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createJob } from '@/lib/itineraryStore';
+import axios from 'axios';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,7 +71,6 @@ export async function POST(request: NextRequest) {
 // This function runs in the background and doesn't block the response
 async function generateItinerary(jobId: string, prompt: string, apiKey: string) {
   const { updateJob } = await import('@/lib/itineraryStore');
-  const { default: axios } = await import('axios');
   
   try {
     // Update job status to processing
@@ -290,19 +290,23 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
           return;
         }
       }
-    } catch (error: any) {
-      if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
-        console.error('Maestro API request timed out:', error);
-      } else if (axios.isAxiosError(error) && error.code === 'ECONNRESET') {
-        console.error('Socket hang up error occurred during Maestro API request:', error);
-      } else {
-        const maestroError = error as Error;
-        console.error('Error with Maestro API:', maestroError.message);
-        if (axios.isAxiosError(maestroError) && maestroError.response) {
-          console.error('Maestro error response data:', JSON.stringify(maestroError.response.data));
-          console.error('Maestro error status:', maestroError.response.status);
-          console.error('Maestro error headers:', JSON.stringify(maestroError.response.headers));
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.code === 'ECONNABORTED') {
+          console.error('Maestro API request timed out:', error);
+        } else if (error.code === 'ECONNRESET') {
+          console.error('Socket hang up error occurred during Maestro API request:', error);
+        } else {
+          console.error('Error with Maestro API:', error.message);
+          if (error.response) {
+            console.error('Maestro error response data:', JSON.stringify(error.response.data));
+            console.error('Maestro error status:', error.response.status);
+            console.error('Maestro error headers:', JSON.stringify(error.response.headers));
+          }
         }
+      } else {
+        const genericError = error as Error;
+        console.error('Unknown error with Maestro API:', genericError.message);
       }
       console.log('Falling back to standard chat completions...');
     }
@@ -382,7 +386,7 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
       });
       return;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error generating itinerary:', error);
     
     // Update job with error
