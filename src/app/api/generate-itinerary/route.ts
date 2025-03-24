@@ -219,7 +219,7 @@ async function generateItinerary(jobId: string, structuredPrompt: string, apiKey
           maestroPayload,
           {
             headers: {
-              'Authorization': `Bearer ${apiKey}`,
+              'Authorization': `Bearer ${apiKey.trim()}`,
               'Content-Type': 'application/json'
             }
           }
@@ -248,7 +248,7 @@ async function generateItinerary(jobId: string, structuredPrompt: string, apiKey
             `https://api.ai21.com/studio/v1/maestro/runs/${runId}`,
             {
               headers: {
-                'Authorization': `Bearer ${apiKey}`,
+                'Authorization': `Bearer ${apiKey.trim()}`,
                 'Content-Type': 'application/json'
               }
             }
@@ -353,7 +353,7 @@ async function generateItinerary(jobId: string, structuredPrompt: string, apiKey
       },
       {
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${apiKey.trim()}`,
           'Content-Type': 'application/json'
         }
       }

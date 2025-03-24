@@ -178,7 +178,7 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
         maestroPayload,
         {
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            'Authorization': `Bearer ${apiKey.trim()}`,
             'Content-Type': 'application/json'
           },
           timeout: 30000 // 30 seconds timeout
@@ -215,7 +215,7 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
           `https://api.ai21.com/studio/v1/maestro/runs/${runId}`,
           {
             headers: {
-              'Authorization': `Bearer ${apiKey}`,
+              'Authorization': `Bearer ${apiKey.trim()}`,
               'Content-Type': 'application/json'
             }
           }
@@ -324,7 +324,7 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
       },
       {
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          'Authorization': `Bearer ${apiKey.trim()}`,
           'Content-Type': 'application/json'
         }
       }
