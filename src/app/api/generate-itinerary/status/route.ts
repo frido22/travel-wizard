@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
     if (!job) {
       console.log(`Job not found: ${jobId}`);
       return NextResponse.json(
-        { error: 'Job not found' },
+        { 
+          error: 'Job not found', 
+          message: 'The requested job was not found. This may occur if the server has restarted since the job was created. Please try submitting your request again.' 
+        },
         { status: 404 }
       );
     }

@@ -13,6 +13,7 @@ export interface ItineraryJob {
   createdAt: Date;
   updatedAt: Date;
   formData?: FormInputs;
+  metadata?: Record<string, unknown>;
 }
 
 // In-memory store

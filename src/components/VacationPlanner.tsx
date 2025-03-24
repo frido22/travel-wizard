@@ -81,13 +81,17 @@ Interests: ${data.interests || 'General sightseeing'}`;
       console.log('Request body:', requestBody);
       
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+        
         const response = await fetch('/api/generate-itinerary/start', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: requestBody,
-        });
+          signal: controller.signal
+        }).finally(() => clearTimeout(timeoutId));
 
         console.log('Response status:', response.status);
         console.log('Response headers:', JSON.stringify(Object.fromEntries(response.headers.entries())));
@@ -130,10 +134,17 @@ Interests: ${data.interests || 'General sightseeing'}`;
         // Start polling for status
         await pollJobStatus(result.jobId);
 
-      } catch (fetchError) {
+      } catch (fetchError: unknown) {
         console.error('Error fetching from API:', fetchError);
         setDebugInfo(prev => `${prev || ''}\nError fetching from API: ${fetchError}`);
-        setError(`Failed to generate itinerary: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
+        
+        // Handle timeout errors specifically
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          setError('Request timed out. The server might be busy. Please try again in a moment.');
+        } else {
+          setError(`Failed to generate itinerary: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`);
+        }
+        
         setLoading(false);
       }
     } catch (error) {
@@ -152,7 +163,7 @@ Interests: ${data.interests || 'General sightseeing'}`;
       let pollCount = 0;
       const maxPolls = 15; // Maximum number of polls (15 polls at 20 seconds initially)
       let retryCount = 0;
-      const maxRetries = 3; // Maximum number of retries for "Job not found" errors
+      const maxRetries = 5; // Increased maximum number of retries for "Job not found" errors
       
       const poll = async () => {
         if (pollCount >= maxPolls) {
@@ -164,21 +175,35 @@ Interests: ${data.interests || 'General sightseeing'}`;
         setProgress(Math.min(95, Math.floor((pollCount / maxPolls) * 100)));
         
         try {
-          const response = await fetch(`/api/generate-itinerary/status?jobId=${id}`);
+          // Add timeout to the fetch request to prevent socket hang-ups
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+          
+          const response = await fetch(`/api/generate-itinerary/status?jobId=${id}`, {
+            signal: controller.signal
+          }).finally(() => clearTimeout(timeoutId));
           
           if (response.status === 404) {
             // Job not found - this could be a race condition
             if (retryCount < maxRetries) {
               retryCount++;
-              console.log(`Job not found, retrying (${retryCount}/${maxRetries})...`);
-              setDebugInfo(prev => `${prev || ''}\nJob not found, retrying in 1 second (${retryCount}/${maxRetries})...`);
+              // Use exponential backoff for retries
+              const retryDelay = Math.min(1000 * Math.pow(2, retryCount - 1), 10000);
+              console.log(`Job not found, retrying (${retryCount}/${maxRetries}) in ${retryDelay}ms...`);
+              setDebugInfo(prev => `${prev || ''}\nJob not found, retrying in ${retryDelay}ms (${retryCount}/${maxRetries})...`);
               
-              // Wait a short time and retry
-              await new Promise(resolve => setTimeout(resolve, 1000));
+              // Wait with exponential backoff and retry
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
               await poll();
               return;
             } else {
-              throw new Error('Job not found after multiple retries');
+              // Try to get more information about the error
+              try {
+                const errorData = await response.json();
+                throw new Error(`Job not found after multiple retries. ${errorData.message || 'Please try again.'}`);
+              } catch (jsonError) {
+                throw new Error('Job not found after multiple retries. Please try again.');
+              }
             }
           } else if (!response.ok) {
             let errorText;
@@ -221,7 +246,22 @@ Interests: ${data.interests || 'General sightseeing'}`;
             // Schedule the next poll
             setTimeout(poll, pollInterval);
           }
-        } catch (error) {
+        } catch (error: unknown) {
+          // Handle abort errors separately
+          if (error instanceof Error && error.name === 'AbortError') {
+            console.error('Status check request timed out');
+            setDebugInfo(prev => `${prev || ''}\nStatus check request timed out, retrying...`);
+            
+            // Retry immediately on timeout
+            if (retryCount < maxRetries) {
+              retryCount++;
+              await poll();
+              return;
+            } else {
+              throw new Error('Status check timed out repeatedly. Please try again.');
+            }
+          }
+          
           console.error('Error checking job status:', error);
           setDebugInfo(prev => `${prev || ''}\nError checking job status: ${error}`);
           setError(`Failed to check generation status: ${error instanceof Error ? error.message : String(error)}`);

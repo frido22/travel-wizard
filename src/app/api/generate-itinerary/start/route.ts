@@ -180,12 +180,20 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
           headers: {
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
-          }
+          },
+          timeout: 30000 // 30 seconds timeout
         }
       );
         
       const runId = maestroResponse.data.id;
       console.log('Maestro Run ID:', runId);
+        
+      // Store the Maestro Run ID in the job metadata
+      updateJob(jobId, { 
+        metadata: { 
+          maestroRunId: runId 
+        } 
+      });
         
       // Poll for completion
       let runStatus = 'in_progress';
@@ -282,13 +290,19 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
           return;
         }
       }
-    } catch (error) {
-      const maestroError = error as Error;
-      console.error('Error with Maestro API:', maestroError.message);
-      if (axios.isAxiosError(maestroError) && maestroError.response) {
-        console.error('Maestro error response data:', JSON.stringify(maestroError.response.data));
-        console.error('Maestro error status:', maestroError.response.status);
-        console.error('Maestro error headers:', JSON.stringify(maestroError.response.headers));
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
+        console.error('Maestro API request timed out:', error);
+      } else if (axios.isAxiosError(error) && error.code === 'ECONNRESET') {
+        console.error('Socket hang up error occurred during Maestro API request:', error);
+      } else {
+        const maestroError = error as Error;
+        console.error('Error with Maestro API:', maestroError.message);
+        if (axios.isAxiosError(maestroError) && maestroError.response) {
+          console.error('Maestro error response data:', JSON.stringify(maestroError.response.data));
+          console.error('Maestro error status:', maestroError.response.status);
+          console.error('Maestro error headers:', JSON.stringify(maestroError.response.headers));
+        }
       }
       console.log('Falling back to standard chat completions...');
     }
@@ -368,7 +382,7 @@ Please provide a detailed day-by-day itinerary for this trip in JSON format with
       });
       return;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating itinerary:', error);
     
     // Update job with error
