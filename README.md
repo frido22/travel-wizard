@@ -34,6 +34,8 @@ npm install
 AI21_API_KEY=your_api_key_here
 ```
 
+**IMPORTANT: Never commit your .env files or API keys to version control. Make sure .env and .env.local files are in your .gitignore file.**
+
 4. Run the development server:
 
 ```bash
@@ -58,7 +60,17 @@ npm run dev
 
 ## Deployment
 
-The easiest way to deploy this application is to use the [Vercel Platform](https://vercel.com/new) from the creators of Next.js.
+### Deploying to Vercel
+
+1. Push your code to a GitHub repository
+   - **IMPORTANT: Make sure your .env files are in .gitignore and not pushed to the repository**
+2. Import the project in Vercel
+3. Configure environment variables:
+   - Add `AI21_API_KEY` with your API key value in the Vercel dashboard (Settings > Environment Variables)
+   - **NEVER hardcode API keys in your codebase or expose them in client-side code**
+4. Deploy the application
+
+### Troubleshooting Vercel Deployment
 
 ## License
 
