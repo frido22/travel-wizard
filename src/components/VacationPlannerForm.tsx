@@ -2,7 +2,6 @@
 
 import { useForm } from 'react-hook-form';
 import { FormInputs } from '@/types/itinerary';
-import { useState } from 'react';
 
 interface VacationPlannerFormProps {
   onSubmit: (data: FormInputs) => Promise<void>;

@@ -1,9 +1,9 @@
 'use client';
 
-import { DailySchedule, Meal } from '@/types/itinerary';
+import { DailyScheduleItem, Meal } from '@/types/itinerary';
 
 interface ItineraryScheduleProps {
-  dailySchedule: DailySchedule[];
+  dailySchedule: DailyScheduleItem[];
 }
 
 export default function ItinerarySchedule({ dailySchedule }: ItineraryScheduleProps) {
@@ -11,7 +11,7 @@ export default function ItinerarySchedule({ dailySchedule }: ItinerarySchedulePr
     <div>
       <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Daily Schedule</h3>
       
-      {dailySchedule.map((day: DailySchedule, index: number) => (
+      {dailySchedule.map((day: DailyScheduleItem, index: number) => (
         <div key={index} className="mb-8 pb-8 border-b border-gray-200 dark:border-gray-700 last:border-0 last:mb-0 last:pb-0">
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
             Day {day.day} - {day.date}
@@ -29,16 +29,22 @@ export default function ItinerarySchedule({ dailySchedule }: ItinerarySchedulePr
                 <h5 className="font-medium text-gray-800 dark:text-white">Morning</h5>
               </div>
               <div className="ml-10">
-                <h5 className="font-medium text-gray-800 dark:text-white">{day.morning.activity}</h5>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  <span className="font-medium">Location:</span> {day.morning.location}
-                </p>
-                <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p><span className="font-medium">Duration:</span> {day.morning.duration}</p>
-                  <p><span className="font-medium">Cost:</span> ${day.morning.cost}</p>
-                  <p><span className="font-medium">Distance:</span> {day.morning.distance}</p>
-                  <p><span className="font-medium">Transport:</span> {day.morning.transportation}</p>
-                </div>
+                {day.morning ? (
+                  <>
+                    <h5 className="font-medium text-gray-800 dark:text-white">{day.morning.activity}</h5>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <span className="font-medium">Location:</span> {day.morning.location}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      <p><span className="font-medium">Duration:</span> {day.morning.duration}</p>
+                      <p><span className="font-medium">Cost:</span> ${day.morning.cost}</p>
+                      <p><span className="font-medium">Distance:</span> {day.morning.distance}</p>
+                      <p><span className="font-medium">Transport:</span> {day.morning.transportation}</p>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No morning activities scheduled</p>
+                )}
               </div>
             </div>
             
@@ -53,16 +59,22 @@ export default function ItinerarySchedule({ dailySchedule }: ItinerarySchedulePr
                 <h5 className="font-medium text-gray-800 dark:text-white">Afternoon</h5>
               </div>
               <div className="ml-10">
-                <h5 className="font-medium text-gray-800 dark:text-white">{day.afternoon.activity}</h5>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  <span className="font-medium">Location:</span> {day.afternoon.location}
-                </p>
-                <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  <p><span className="font-medium">Duration:</span> {day.afternoon.duration}</p>
-                  <p><span className="font-medium">Cost:</span> ${day.afternoon.cost}</p>
-                  <p><span className="font-medium">Distance:</span> {day.afternoon.distance}</p>
-                  <p><span className="font-medium">Transport:</span> {day.afternoon.transportation}</p>
-                </div>
+                {day.afternoon ? (
+                  <>
+                    <h5 className="font-medium text-gray-800 dark:text-white">{day.afternoon.activity}</h5>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <span className="font-medium">Location:</span> {day.afternoon.location}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      <p><span className="font-medium">Duration:</span> {day.afternoon.duration}</p>
+                      <p><span className="font-medium">Cost:</span> ${day.afternoon.cost}</p>
+                      <p><span className="font-medium">Distance:</span> {day.afternoon.distance}</p>
+                      <p><span className="font-medium">Transport:</span> {day.afternoon.transportation}</p>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No afternoon activities scheduled</p>
+                )}
               </div>
             </div>
             
@@ -70,30 +82,34 @@ export default function ItinerarySchedule({ dailySchedule }: ItinerarySchedulePr
             <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
               <h5 className="font-medium text-gray-800 dark:text-white mb-3">Meals</h5>
               <div className="space-y-4">
-                {day.meals.map((meal: Meal, mealIndex: number) => (
-                  <div key={mealIndex} className="flex items-start">
-                    <div className="bg-green-100 dark:bg-green-800 p-1 rounded-full mr-3 mt-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600 dark:text-green-300" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-800 dark:text-white capitalize">{meal.type}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{meal.suggestion}</p>
-                      <div className="flex items-center mt-1 text-sm">
-                        <span className="text-gray-600 dark:text-gray-400 mr-3">Cost: ${meal.cost}</span>
-                        {meal.accommodatesRestrictions && (
-                          <span className="text-green-600 dark:text-green-400 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            Accommodates Restrictions
-                          </span>
-                        )}
+                {day.meals && day.meals.length > 0 ? (
+                  day.meals.map((meal: Meal, mealIndex: number) => (
+                    <div key={mealIndex} className="flex items-start">
+                      <div className="bg-green-100 dark:bg-green-800 p-1 rounded-full mr-3 mt-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600 dark:text-green-300" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-800 dark:text-white capitalize">{meal.type}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{meal.suggestion}</p>
+                        <div className="flex items-center mt-1 text-sm">
+                          <span className="text-gray-600 dark:text-gray-400 mr-3">Cost: ${meal.cost}</span>
+                          {meal.accommodatesRestrictions && (
+                            <span className="text-green-600 dark:text-green-400 flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                              Accommodates Restrictions
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No meals scheduled</p>
+                )}
               </div>
             </div>
           </div>

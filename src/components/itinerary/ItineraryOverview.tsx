@@ -1,6 +1,6 @@
 'use client';
 
-import { Itinerary, DailySchedule } from '@/types/itinerary';
+import { Itinerary, DailyScheduleItem } from '@/types/itinerary';
 
 interface ItineraryOverviewProps {
   itinerary: Itinerary;
@@ -17,9 +17,9 @@ export default function ItineraryOverview({ itinerary }: ItineraryOverviewProps)
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
           <h4 className="font-semibold text-gray-800 dark:text-white mb-2">Trip Highlights</h4>
           <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1">
-            {itinerary.dailySchedule.map((day: DailySchedule, index: number) => (
+            {itinerary.dailySchedule.map((day: DailyScheduleItem, index: number) => (
               <li key={index}>
-                <span className="font-medium">Day {day.day}:</span> {day.morning.activity}, {day.afternoon.activity}
+                <span className="font-medium">Day {day.day}:</span> {day.morning?.activity}, {day.afternoon?.activity}
               </li>
             ))}
           </ul>
@@ -32,10 +32,10 @@ export default function ItineraryOverview({ itinerary }: ItineraryOverviewProps)
               <span className="font-medium">Duration:</span> {itinerary.dailySchedule.length} days
             </p>
             <p className="text-gray-600 dark:text-gray-300">
-              <span className="font-medium">Estimated Cost:</span> ${itinerary.costBreakdown.totalEstimatedCost}
+              <span className="font-medium">Estimated Cost:</span> ${itinerary.costBreakdown?.totalEstimatedCost}
             </p>
             <p className="text-gray-600 dark:text-gray-300">
-              <span className="font-medium">Budget Assessment:</span> {itinerary.costBreakdown.comparisonToBudget}
+              <span className="font-medium">Budget Assessment:</span> {itinerary.costBreakdown?.comparisonToBudget}
             </p>
           </div>
         </div>
